@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shopper Big</title>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./node_modules/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+ghsGrraenxL4Z4Q1vz4F5v5f5DSn8A6E2roHpUxtJzUsh+o"
+    crossorigin="anonymous"></script>
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script> -->
+   
+    <style>
+        a {
+            text-decoration: none;
+            color: white;
+        }
+
+        a:hover {
+            color: brown;
+        }
+    </style>
+    <script>
+        function loadCatagory() {
+            fetch("https://fakestoreapi.com/products/categories")
+                .then(function (responce) {
+                    return responce.json()
+                })
+                .then(function (categories) {
+                    categories.unshift("all")
+                    for (var catagory of categories) {
+                        var option = document.createElement("option")
+                        option.value = catagory;
+                        option.text = catagory.toUpperCase();
+                        document.getElementById("listCatagory").appendChild(option)
+                    }
+                })
+        }
+        function loadProducts(url) {
+            document.querySelector("main").innerHTML = "";
+            fetch(url)
+                .then(function (res) {
+                    return res.json()
+                })
+                .then(function (products) {
+
+                    console.log(products)
+                    for (var product of products) {
+                        // console.log("pjlcoe",product)
+                        var card = document.createElement("div");
+                        card.className = "card p-2 m-2";
+                        card.style.width = "200px"
+                        card.style.height = "400px"
+                        card.innerHTML = `
+                        <img src= ${product.image} class="card-img-top h-25">
+                     <div class="card-header overflow-auto" style="height:80px">
+             
+
+                            <p>${product.title}</p>
+                            </div>
+                            <div class="card-body h-25">
+                                   <dl>
+                                    <dt>Price</dt>
+                                    <dd>${product.rating.rate}</dd>
+                                    <dt>Rating</dt>
+                                    <span class="bi bi-star-fill bg-success text-white p-0.1"></span>
+                                    <dd>${product.rating.count}</dd>
+
+                                    </dl>
+                                </div>
+                                <div class="card-footer">
+                                    <button onclick="addToCart(${product.id})" class="btn btn-danger">&nbsp;
+                                       <span class="bi bi-cart-fill "> Add to cart</span>
+                                       </button>
+                                    </div>
+                        `;
+                        document.querySelector("main").appendChild(card);
+
+                    }
+                })
+        }
+        function bodyLoad() {
+            loadCatagory();
+            loadProducts("https://fakestoreapi.com/products");
+        }
+        function changeCatagory() {
+
+            var catagoryName = document.getElementById("listCatagory").value;
+            if (catagoryName == "all") {
+                loadProducts("https://fakestoreapi.com/products");
+            } else {
+                loadProducts(`https://fakestoreapi.com/products/category/${catagoryName}`);
+            }
+
+
+        }
+        function NavClick(catagoryName) {
+            document.getElementById("listCatagory").value = catagoryName;
+            if (catagoryName == "all") {
+                loadProducts("https://fakestoreapi.com/products");
+            } else {
+                loadProducts(`https://fakestoreapi.com/products/category/${catagoryName}`);
+            }
+        }
+        var cartCount = [];
+        function getCartCount() {
+            document.getElementById("badgeId").innerHTML = cartCount.length;
+        }
+        function addToCart(id) {
+            fetch(`https://fakestoreapi.com/products/${id}`)
+                .then(function (cart) {
+                    return cart.json()
+                })
+                .then(function (product) {
+                    console.log("rrr", product)
+                    alert(`${product.title} Added to Cart`)
+                    cartCount.push(product)
+                    getCartCount()
+
+                    var tr = document.createElement("tr")
+                    var td1 = document.createElement("td")
+                    var td2 = document.createElement("td")
+                    var td3 = document.createElement("td")
+                    var td4 = document.createElement("td")
+
+
+                    td1.innerHTML = `<p class="overflow-auto">${product.title}</p>`;
+                    td2.innerHTML = `<img src= ${product.image} width="50px" height="60px"> `;
+                    td3.innerHTML = `${product.price}`;
+                    td4.innerHTML = `<i class="bi bi-trash" style="color:red" onclick="removeRow(this)"></i>`
+
+
+               var tableBody = document.querySelector("tbody");
+
+                    tableBody.appendChild(tr);
+                    tr.appendChild(td1)
+                    tr.appendChild(td2)
+                    tr.appendChild(td3)
+                    tr.appendChild(td4);
+
+                })
+        }
+
+
+function removeRow(icon) {
+    var row = icon.parentNode.parentNode; 
+    var index = Array.from(row.parentNode.children).indexOf(row); 
+    row.parentNode.removeChild(row); 
+
+    if (index >= 0 && index < cartCount.length) {
+        cartCount.splice(index, 1);
+        getCartCount(); 
+    }
+}
+    </script>
+</head>
+
+<body onload="bodyLoad()">
+    <header class="d-flex justify-content-between p-2 mt-3 bg-dark text-white">
+        <div>
+            <span style="font-size: 22px;font-weight: bold;">Shopper.</span>
+        </div>
+        <div style="font: 20px">
+            <span class="me-3"><a href="javascript:NavClick(`all`)">Home</a></span>
+            <span class="me-3"><a href="javascript:NavClick(`electronics`)">Electronics</a></span>
+            <span class="me-3"><a href="javascript:NavClick(`jewelery`)">Jewelery</a></span>
+            <span class="me-3"><a href="javascript:NavClick(`men\'s clothing`)">Men's clothing></a></span>
+            <span class="me-3"><a href="javascript:NavClick(`women\'s clothing`)">Women's clothing</a></span>
+        </div>
+        <div>
+            <span class="bi bi-search me-3"></span>
+            <span class="bi bi-person me-3"></span>
+            <span class="bi bi-heart "></span>
+            <!-- <button data-bs-target="#cart" data-bs-toggle="modal" class="me-1 position-relative btn bg-dark text-white">
+                <span class="bi bi-cart "></span>
+                <span class="position-absolute badge rounded rounded-circle bg-danger" id="badgeId">0</span>
+            </button> -->
+
+            <button data-bs-toggle="modal" data-bs-target="#cartModal" class="me-1 position-relative btn bg-dark text-white">
+                <span class="bi bi-cart "></span>
+                <span class="position-absolute badge rounded rounded-circle bg-danger" id="badgeId">0</span>
+            </button>
+
+            <div class="modal fade" id="cartModal">
+
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="text-info">Your Cart Summary</h4>
+                            
+                            <button data-bs-dismiss="modal" class="btn btn-close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-striped text-black table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Preview</th>
+                                        <th>Price</th>
+                                        <th>Trash</th>
+
+                                    </tr>
+                                    <tbody>
+                                        
+                                
+                                    </tbody>
+                            </table>
+                            
+                        </div>
+                        <div class="modal-footer"></div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    </header>
+    <section class=" row mt-2">
+        <nav class="col-2">
+            <div>
+                <label class="form-label fw-bold">Select Catagory</label>
+                <div>
+                    <select onchange="changeCatagory()" class="form-select" id="listCatagory">
+
+                    </select>
+                </div>
+            </div>
+        </nav>
+        <main class="col-10 d-flex flex-wrap"></main>
+    </section>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="./node_modules/jquery/dist/jquery.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-bootstrap/0.5pre/assets/js/bootstrap.min.js" integrity="sha512-ZPmDPQf8gWl5YoEwyPZMWi/kam9NTb2+jeChvhX8rfuUw0KCGlWt4HuWu5JQIo3/LWTuHLNZ2DqKFy8niqR6Sw==" 
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-bootstrap/0.5pre/assets/js/jquery-1.9.0.min.js" integrity="sha512-synHs+rLg2WDVE9U0oHVJURDCiqft60GcWOW7tXySy8oIr0Hjl3K9gv7Bq/gSj4NDVpc5vmsNkMGGJ6t2VpUMA=="
+     crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    
+</body>
+
+</html>
